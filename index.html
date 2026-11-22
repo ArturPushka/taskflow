@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow — Productivity Workspace</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Dashboard hero */
+        .dashboard-hero {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 28px;
+            min-height: 235px;
+            padding: 34px 38px;
+            margin-bottom: 22px;
+            overflow: hidden;
+            border: 1px solid rgba(0,229,255,.22);
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at 82% 48%, rgba(0,229,255,.17), transparent 24%),
+                radial-gradient(circle at 100% 0%, rgba(166,107,255,.17), transparent 35%),
+                linear-gradient(115deg, rgba(17,29,49,.98), rgba(12,24,44,.96));
+            box-shadow: 0 16px 50px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.04);
+        }
+        .hero-copy { position: relative; z-index: 2; }
+        .hero-eyebrow {
+            display: inline-block;
+            color: #00e5ff;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+        .dashboard-hero h1 {
+            margin: 12px 0 8px;
+            color: #edf5ff;
+            font-size: clamp(27px, 4vw, 38px);
+            letter-spacing: -1.5px;
+        }
+        .dashboard-hero p { margin: 0; color: #9aabc3; }
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .hero-actions .primary-button { padding: 12px 18px; }
+        .hero-secondary-button {
+            padding: 11px 15px;
+            border: 1px solid rgba(145,180,220,.22);
+            border-radius: 11px;
+            background: rgba(255,255,255,.035);
+            color: #dceaff;
+            font-weight: 600;
+        }
+        .hero-secondary-button:hover {
+            border-color: #00e5ff;
+            color: #00e5ff;
+            background: rgba(0,229,255,.07);
+        }
+        .hero-secondary-button span { margin-left: 8px; color: #00e5ff; }
+        .hero-orbit {
+            position: relative;
+            flex: 0 0 190px;
+            height: 170px;
+            display: grid;
+            place-items: center;
+        }
+        .orbit-ring {
+            position: absolute;
+            border: 1px solid rgba(0,229,255,.28);
+            border-radius: 50%;
+            transform: rotate(-25deg);
+        }
+        .ring-one { width: 145px; height: 92px; }
+        .ring-two {
+            width: 110px;
+            height: 150px;
+            border-color: rgba(166,107,255,.35);
+            transform: rotate(55deg);
+        }
+        .orbit-core {
+            width: 70px;
+            height: 70px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(0,229,255,.6);
+            border-radius: 22px;
+            background: linear-gradient(145deg, rgba(0,229,255,.2), rgba(71,123,255,.18));
+            color: #eafcff;
+            font-size: 23px;
+            font-weight: 800;
+            box-shadow: 0 0 35px rgba(0,229,255,.2);
+            transform: rotate(-8deg);
+        }
+        .orbit-core span { color: #00e5ff; font-size: 12px; }
+        .orbit-caption {
+            position: absolute;
+            bottom: 0;
+            color: #7891ad;
+            font-size: 8px;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+        .dashboard-progress { margin-bottom: 22px; padding: 22px 25px; }
+        .dashboard-progress-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+        .dashboard-progress h2 { margin: 7px 0 4px; font-size: 19px; }
+        .dashboard-progress p { margin: 0; font-size: 13px; }
+        .progress-percent {
+            color: #00e5ff;
+            font-size: 28px;
+            font-weight: 800;
+            text-shadow: 0 0 18px rgba(0,229,255,.25);
+        }
+        .dashboard-progress-track {
+            height: 9px;
+            margin-top: 19px;
+            overflow: hidden;
+            border-radius: 20px;
+            background: rgba(111,143,184,.16);
+        }
+        .dashboard-progress-fill {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg,#00e5ff,#477bff,#a66bff);
+            box-shadow: 0 0 16px rgba(0,229,255,.4);
+            transition: width .8s cubic-bezier(.2,.8,.2,1);
+        }
+        .dashboard-progress-bottom {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 10px;
+            color: #8191aa;
+            font-size: 11px;
+        }
+
+        /* Task details */
+        .task-info { min-width: 0; }
+        .task-name-button {
+            display: inline-block;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+        }
+        .task-name-button:hover { color: #00e5ff; }
+        .task-details-button {
+            padding: 7px 10px;
+            border: 1px solid rgba(0,229,255,.25);
+            border-radius: 8px;
+            background: rgba(0,229,255,.07);
+            color: #00dff5;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .task-details-button:hover {
+            background: rgba(0,229,255,.16);
+            border-color: #00e5ff;
+        }
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 7px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+        .priority-low { color: #38e6ae; background: rgba(56,230,174,.1); }
+        .priority-medium { color: #ffc56b; background: rgba(255,197,107,.1); }
+        .priority-high { color: #ff6685; background: rgba(255,102,133,.12); }
+
+        .details-modal-content {
+            width: min(650px, calc(100vw - 32px));
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .details-intro {
+            margin: 0 0 20px;
+            color: #91a4bf;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .details-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .details-field { display: flex; flex-direction: column; gap: 7px; }
+        .details-field.full-width { grid-column: 1 / -1; }
+        .details-field label { margin: 0; }
+        .details-field input,
+        .details-field select,
+        .details-field textarea {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .details-field textarea { resize: vertical; min-height: 100px; }
+        .details-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            padding: 14px;
+            border: 1px solid rgba(0,229,255,.14);
+            border-radius: 12px;
+            background: rgba(0,229,255,.04);
+        }
+        .details-status p { margin: 0; color: #9aabc3; font-size: 12px; }
+        .history-section {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(145,180,220,.14);
+        }
+        .history-section h3 { margin: 0 0 12px; font-size: 15px; }
+        .history-entry {
+            position: relative;
+            margin: 0 0 10px 5px;
+            padding: 0 0 10px 16px;
+            border-left: 1px solid rgba(0,229,255,.3);
+        }
+        .history-entry::before {
+            content: "";
+            position: absolute;
+            left: -4px;
+            top: 3px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #00e5ff;
+        }
+        .history-entry p { margin: 0 0 4px; color: #dceaff; font-size: 12px; }
+        .history-entry small { color: #8294ae; font-size: 10px; }
+        .details-footer {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .details-footer-right { display: flex; gap: 9px; }
+        .status-toggle-button {
+            padding: 9px 13px;
+            border: 1px solid rgba(56,230,174,.3);
+            border-radius: 9px;
+            background: rgba(56,230,174,.08);
+            color: #38e6ae;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .status-toggle-button:hover { background: rgba(56,230,174,.16); }
+
+        @media (max-width: 700px) {
+            .dashboard-hero { min-height: 0; padding: 25px 22px; }
+            .hero-orbit { flex-basis: 105px; transform: scale(.72); margin: -15px -20px -15px 0; }
+            .dashboard-hero h1 { font-size: 27px; }
+        }
+        @media (max-width: 480px) {
+            .hero-orbit { display: none; }
+            .details-form-grid { grid-template-columns: 1fr; }
+            .details-field.full-width { grid-column: auto; }
+            .details-footer { flex-direction: column; }
+            .details-footer-right { justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="logo">Task<span>Flow.</span></div>
+
+        <p class="menu-label">WORKSPACE</p>
+        <nav class="menu">
+            <a href="#" class="active" data-page="dashboard">▦ Dashboard</a>
+            <a href="#" data-page="tasks">✓ My Tasks</a>
+            <a href="#" data-page="projects">▣ Projects</a>
+            <a href="#" data-page="calendar">▦ Calendar</a>
+        </nav>
+
+        <p class="menu-label">MANAGEMENT</p>
+        <nav class="menu">
+            <a href="#" data-page="statistics">◷ Statistics</a>
+            <a href="#" data-page="settings">⚙ Settings</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-card">
+                <h3>Keep moving!</h3>
+                <p>Every completed task is progress.</p>
+            </div>
+            <div class="account">👤 My Workspace</div>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <h2 id="pageTitle">Dashboard</h2>
+                <p>Your personal productivity workspace</p>
+            </div>
+            <div class="top-date" id="todayLabel"></div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section class="page active-page" id="dashboardPage">
+
+            <div class="welcome dashboard-hero">
+                <div class="hero-copy">
+                    <span class="hero-eyebrow">YOUR PRODUCTIVITY SPACE</span>
+                    <h1 id="welcomeTitle">Welcome back 👋</h1>
+                    <p id="welcomeSubtitle">Let's make today productive.</p>
+                    <div class="hero-actions">
+                        <button class="primary-button" id="quickAddTask">＋ Create a task</button>
+                        <button class="hero-secondary-button" id="quickProjects">Explore projects <span>↗</span></button>
+                    </div>
+                </div>
+                <div class="hero-orbit" aria-hidden="true">
+                    <div class="orbit-ring ring-one"></div>
+                    <div class="orbit-ring ring-two"></div>
+                    <div class="orbit-core">TF<span>✦</span></div>
+                    <div class="orbit-caption">PLAN · FOCUS · ACHIEVE</div>
+                </div>
+            </div>
+
+            <div class="dashboard-progress content-card">
+                <div class="dashboard-progress-top">
+                    <div>
+                        <span class="hero-eyebrow">DAILY OVERVIEW</span>
+                        <h2>Your momentum</h2>
+                        <p id="dailyProgressText">Start with one small task.</p>
+                    </div>
+                    <div class="progress-percent" id="dailyProgressPercent">0%</div>
+                </div>
+                <div class="dashboard-progress-track">
+                    <div class="dashboard-progress-fill" id="dailyProgressFill"></div>
+                </div>
+                <div class="dashboard-progress-bottom">
+                    <span id="dailyCompletedText">0 completed</span>
+                    <span id="dailyRemainingText">0 remaining</span>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-icon purple">▦</span>
+                    <p>Total Tasks</p>
+                    <h2 id="totalTasks">0</h2>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon green">✓</span>
+                    <p>Completed</p>
+                    <h2 id="completedTasks">0</h2>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon orange">◷</span>
+                    <p>In Progress</p>
+                    <h2 id="progressTasks">0</h2>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon red">!</span>
+                    <p>Overdue</p>
+                    <h2 id="overdueTasks">0</h2>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-header">
+                    <div>
+                        <h2>Recent Tasks</h2>
+                        <p>Your latest activities</p>
+                    </div>
+                    <button class="primary-button" id="addTaskBtn">+ Add Task</button>
+                </div>
+                <div id="dashboardTaskList"></div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-header">
+                    <div>
+                        <h2>Upcoming Deadlines</h2>
+                        <p>Tasks that need your attention</p>
+                    </div>
+                    <button class="text-button" data-open-page="calendar">Open Calendar →</button>
+                </div>
+                <div id="upcomingList"></div>
+            </div>
+        </section>
+
+        <!-- TASKS -->
+        <section class="page" id="tasksPage">
+            <div class="page-heading">
+                <div>
+                    <h1>My Tasks</h1>
+                    <p>Manage all your activities.</p>
+                </div>
+                <button class="primary-button" id="addTaskBtn2">+ Add Task</button>
+            </div>
+
+            <div class="content-card">
+                <div class="filters">
+                    <input id="taskSearch" placeholder="Search tasks...">
+                    <select id="taskFilter">
+                        <option value="all">All tasks</option>
+                        <option value="active">In progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+                <div id="allTaskList"></div>
+            </div>
+        </section>
+
+        <!-- PROJECTS -->
+        <section class="page" id="projectsPage">
+            <div class="page-heading">
+                <div>
+                    <h1>My Projects</h1>
+                    <p>Organize your work into projects.</p>
+                </div>
+                <button class="primary-button" id="addProjectBtn">+ New Project</button>
+            </div>
+
+            <div class="stats two-columns">
+                <div class="stat-card">
+                    <p>Total Projects</p>
+                    <h2 id="totalProjects">0</h2>
+                </div>
+                <div class="stat-card">
+                    <p>Tasks in Projects</p>
+                    <h2 id="projectTasks">0</h2>
+                </div>
+            </div>
+
+            <div class="projects-grid" id="projectsList"></div>
+        </section>
+
+        <!-- CALENDAR -->
+        <section class="page" id="calendarPage">
+            <div class="page-heading">
+                <div>
+                    <h1>Calendar</h1>
+                    <p>Plan your days and keep track of deadlines.</p>
+                </div>
+                <button class="primary-button" id="calendarAddTask">+ Add Task</button>
+            </div>
+
+            <div class="calendar-layout">
+                <div class="content-card calendar-card">
+                    <div class="calendar-header">
+                        <div>
+                            <h2 id="calendarMonth"></h2>
+                            <p id="calendarSubtitle">Your monthly overview</p>
+                        </div>
+                        <div class="calendar-controls">
+                            <button class="month-button" id="prevMonth" aria-label="Previous month">‹</button>
+                            <button class="month-button" id="nextMonth" aria-label="Next month">›</button>
+                            <button class="today-button" id="goToday">Today</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                    <div class="calendar-legend">
+                        <span><i class="legend-dot purple-dot"></i> Has tasks</span>
+                        <span><i class="legend-dot green-dot"></i> Completed</span>
+                        <span><i class="legend-dot red-dot"></i> Overdue</span>
+                    </div>
+                </div>
+
+                <div class="content-card selected-date-card">
+                    <div class="selected-date-heading">
+                        <div>
+                            <p class="small-label">SELECTED DAY</p>
+                            <h2 id="selectedDateTitle">Today</h2>
+                        </div>
+                        <span class="selected-day-icon">▦</span>
+                    </div>
+                    <div class="day-summary" id="daySummary"></div>
+                    <div id="selectedDateTasks"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATISTICS -->
+        <section class="page" id="statisticsPage">
+            <div class="page-heading">
+                <div>
+                    <h1>Statistics</h1>
+                    <p>Your productivity overview.</p>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <p>Total Tasks</p>
+                    <h2 id="statsTotal">0</h2>
+                </div>
+                <div class="stat-card">
+                    <p>Completed</p>
+                    <h2 id="statsCompleted">0</h2>
+                </div>
+                <div class="stat-card">
+                    <p>Completion Rate</p>
+                    <h2 id="completionRate">0%</h2>
+                </div>
+                <div class="stat-card">
+                    <p>Overdue</p>
+                    <h2 id="statsOverdue">0</h2>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-header">
+                    <div>
+                        <h2>Productivity</h2>
+                        <p>Your completed tasks compared with all tasks.</p>
+                    </div>
+                </div>
+                <div class="large-progress">
+                    <div id="statisticsProgress"></div>
+                </div>
+                <p class="progress-caption" id="statisticsCaption">No tasks yet.</p>
+            </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section class="page" id="settingsPage">
+            <div class="page-heading">
+                <div>
+                    <h1>Settings</h1>
+                    <p>Manage your workspace.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2>Workspace data</h2>
+                <p class="muted">Your tasks and projects are saved in this browser.</p>
+                <button class="danger-button" id="clearDataBtn">Delete all data</button>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- CREATE TASK MODAL -->
+<div class="modal" id="taskModal">
+    <div class="modal-content">
+        <div class="modal-heading">
+            <h2>Create Task</h2>
+            <button class="close-button" id="closeTaskModal">×</button>
+        </div>
+
+        <label for="taskName">Task name</label>
+        <input id="taskName" placeholder="Enter task name">
+
+        <label for="taskDescription">Description</label>
+        <textarea id="taskDescription" rows="3" placeholder="What needs to be done?"></textarea>
+
+        <label for="taskCategory">Category</label>
+        <select id="taskCategory">
+            <option>Development</option>
+            <option>Design</option>
+            <option>Learning</option>
+            <option>Personal</option>
+        </select>
+
+        <label for="taskPriority">Priority</label>
+        <select id="taskPriority">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+        </select>
+
+        <label for="taskProject">Project</label>
+        <select id="taskProject">
+            <option value="">No project</option>
+        </select>
+
+        <label for="taskDate">Deadline</label>
+        <input type="date" id="taskDate">
+
+        <div class="modal-actions">
+            <button class="secondary-button" id="cancelTaskBtn">Cancel</button>
+            <button class="primary-button" id="saveTaskBtn">Create Task</button>
+        </div>
+    </div>
+</div>
+
+<!-- TASK DETAILS MODAL -->
+<div class="modal" id="detailsModal">
+    <div class="modal-content details-modal-content">
+        <div class="modal-heading">
+            <div>
+                <span class="hero-eyebrow">TASK WORKSPACE</span>
+                <h2 id="detailsHeading">Task Details</h2>
+            </div>
+            <button class="close-button" id="closeDetailsModal">×</button>
+        </div>
+
+        <p class="details-intro">Edit your task information below. Your changes will be saved in this browser.</p>
+
+        <div class="details-form-grid">
+            <div class="details-field full-width">
+                <label for="detailsName">Task name</label>
+                <input id="detailsName" placeholder="Task name">
+            </div>
+
+            <div class="details-field full-width">
+                <label for="detailsDescription">Description</label>
+                <textarea id="detailsDescription" placeholder="Add more details about this task..."></textarea>
+            </div>
+
+            <div class="details-field">
+                <label for="detailsCategory">Category</label>
+                <select id="detailsCategory">
+                    <option>Development</option>
+                    <option>Design</option>
+                    <option>Learning</option>
+                    <option>Personal</option>
+                    <option>General</option>
+                </select>
+            </div>
+
+            <div class="details-field">
+                <label for="detailsPriority">Priority</label>
+                <select id="detailsPriority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+
+            <div class="details-field">
+                <label for="detailsProject">Project</label>
+                <select id="detailsProject">
+                    <option value="">No project</option>
+                </select>
+            </div>
+
+            <div class="details-field">
+                <label for="detailsDate">Deadline</label>
+                <input type="date" id="detailsDate">
+            </div>
+        </div>
+
+        <div class="details-status">
+            <div>
+                <strong id="detailsStatusText">In progress</strong>
+                <p>Current task status</p>
+            </div>
+            <button class="status-toggle-button" id="detailsToggleStatus">✓ Mark completed</button>
+        </div>
+
+        <div class="history-section">
+            <h3>Activity history</h3>
+            <div id="taskHistory"></div>
+        </div>
+
+        <div class="details-footer">
+            <button class="danger-button" id="detailsDeleteTask">Delete task</button>
+            <div class="details-footer-right">
+                <button class="secondary-button" id="cancelDetailsBtn">Close</button>
+                <button class="primary-button" id="saveDetailsBtn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="modal" id="projectModal">
+    <div class="modal-content">
+        <div class="modal-heading">
+            <h2>New Project</h2>
+            <button class="close-button" id="closeProjectModal">×</button>
+        </div>
+
+        <label for="projectName">Project name</label>
+        <input id="projectName" placeholder="Enter project name">
+
+        <label for="projectDescription">Description</label>
+        <textarea id="projectDescription" rows="4" placeholder="Project description"></textarea>
+
+        <div class="modal-actions">
+            <button class="secondary-button" id="cancelProjectBtn">Cancel</button>
+            <button class="primary-button" id="saveProjectBtn">Create Project</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
